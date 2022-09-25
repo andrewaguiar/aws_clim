@@ -1,3 +1,4 @@
+require 'ostruct'
 require 'json'
 require 'open3'
 
@@ -331,62 +332,39 @@ class AwsClim
     end
   end
 
-  private
-
   def execute(service, options)
-    cmd = "aws #{service} #{option_to_s(options)} --profile=#{@profile}"
+    cmd = "aws #{service} #{format_options(options)} --profile=#{@profile} #{format_options(@global_options)}"
 
     out, err, status = Open3.capture3(cmd)
 
     if status.success?
-      JSON.parse(out)
+      OpenStruct.new(success?: true, error?: false, data: OpenStruct.new(JSON.parse(out)))
     else
-      { 'error' => true, message: err }
+      OpenStruct.new(success?: false, error?: true, data: err)
     end
   end
 
-  def option_to_s(options)
-    if options.is_a?(String)
-      options
+  private
 
-    elsif options.is_a?(Array)
+  def format_options(options)
+    return '' if options.nil?
+
+    if options.is_a?(Array)
       options.map { |option|
-        (option.is_a?(Array) ? "--#{option[0]}=\"#{option[1]}\"" : option)
+        format_option(option)
       }.join(' ')
+    elsif options.is_a?(String)
+      "#{option}"
+    end
+  end
+
+  def format_option(option)
+    if option.is_a?(Array)
+      "--#{option[0]}=\"#{option[1]}\""
+    elsif option.is_a?(Hash)
+      format_options(option.to_a)
+    else
+      "#{option}"
     end
   end
 end
-
-aws = AwsClim.new(ARGV[0])
-
-# Find RestApi
-
-puts "### Find RestApi "
-
-rest_api = aws.apigateway('get-rest-apis')['items'].find do |item|
-  item['tags']['aws:cloudformation:stack-name'].start_with?('transferless')
-end
-
-puts rest_api
-
-puts "\n### Find Resource "
-
-resource = aws.apigateway('get-resources', ['rest-api-id', rest_api['id']])['items'].find do |item|
-  item['path'] == "/wallet/{walletId}" && item['resourceMethods'].include?('GET')
-end
-
-puts resource
-
-puts "\n### Adding Method Response "
-
-puts aws.apigateway(
-  'put-method-response',
-  ['rest-api-id', rest_api['id']],
-  ['resource-id', resource['id']],
-  ['http-method', 'GET'],
-  ['status-code', '200'],
-  ['response-parameters','method.response.header.access-control-allow-origin=false']
-)
-
-
-

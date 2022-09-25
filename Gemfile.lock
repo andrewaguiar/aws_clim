@@ -1,0 +1,17 @@
+PATH
+  remote: .
+  specs:
+    aws_clim (1.0.0)
+
+GEM
+  remote: https://rubygems.org/
+  specs:
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  aws_clim!
+
+BUNDLED WITH
+   2.1.4
