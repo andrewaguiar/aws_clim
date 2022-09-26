@@ -1,8 +1,14 @@
 # AwsClim
 
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/aws_clim`. To experiment with that code, run `bin/console` for an interactive prompt.
+AwsClim is a light wrapper around `aws cli` tool. it adds some convenience when calling the command and
+dealing with the results.
 
-TODO: Delete this and the text above, and describe your gem
+  - Maps all aws services as a method on AwsClim instance.
+  - Set format as JSON as default.
+  - Deals with arguments as Array, Hash or simply string
+  - Parses all results as JSON
+  - Returns an `OpenStruct.new(error: true, success: false, data: err)` when error happens.
+  - Returns an `OpenStruct.new(error: false, success: true, data: JSON.parse(out, object_class: OpenStruct))` when command returns successfuly.
 
 ## Installation
 
@@ -21,6 +27,17 @@ Or install it yourself as:
     $ gem install aws_clim
 
 ## Usage
+
+```
+aws = AwsClim.new()
+```
+
+By calling new without parameters AwsClim uses the profile `default`(see https://docs.aws.amazon.com/sdk-for-php/v3/developer-guide/guide_credentials_profiles.html to learn about aws profiles).
+To set a different profile use profile argument on new.
+
+```
+aws = AwsClim.new(profile: 'other-profile')
+```
 
 With a instance of AwsClim call aws services by its name and pass subcommands and options:
 

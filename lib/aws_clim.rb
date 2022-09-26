@@ -3,7 +3,7 @@ require 'json'
 require 'open3'
 
 class AwsClim
-  def initialize(profile = 'default', global_options = {})
+  def initialize(profile: 'default', global_options: {})
     @profile = profile
     @global_options = global_options
   end
@@ -330,6 +330,10 @@ class AwsClim
     define_method service_name do |*ps|
       execute(service_name, ps)
     end
+
+    define_method "#{service_name}_help" do
+      execute(service_name, 'help').data
+    end
   end
 
   def execute(service, options)
@@ -338,7 +342,14 @@ class AwsClim
     out, err, status = Open3.capture3(cmd)
 
     if status.success?
-      OpenStruct.new(success?: true, error?: false, data: OpenStruct.new(JSON.parse(out)))
+      data =
+        begin
+          JSON.parse(out, object_class: OpenStruct)
+        rescue JSON::ParserError => e
+          out
+        end
+
+      OpenStruct.new(success?: true, error?: false, data: data)
     else
       OpenStruct.new(success?: false, error?: true, data: err)
     end
@@ -354,7 +365,7 @@ class AwsClim
         format_option(option)
       }.join(' ')
     elsif options.is_a?(String)
-      "#{option}"
+      "#{options}"
     end
   end
 
