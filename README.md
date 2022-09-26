@@ -65,6 +65,10 @@ result.error?
 result.data
 ```
 
+## Warning
+
+As AwsClim rely on aws cli executable, some services can be unavailable depending of your version.
+
 ## License
 
 The gem is available as open source under the terms of the [MIT License](https://opensource.org/licenses/MIT).

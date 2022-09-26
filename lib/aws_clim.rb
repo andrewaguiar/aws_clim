@@ -8,7 +8,8 @@ class AwsClim
     @global_options = global_options
   end
 
-  %w(
+  # https://docs.aws.amazon.com/cli/latest/reference/
+  SERVICES = %w(
     accessanalyzer
     account
     acm
@@ -326,7 +327,13 @@ class AwsClim
     workspaces
     workspaces-web
     xray
-  ).each do |service_name|
+  )
+
+  def self.services
+    SERVICES
+  end
+
+  SERVICES.each do |service_name|
     define_method "#{service_name.gsub('-', '_')}" do |*ps|
       execute(service_name, ps)
     end
