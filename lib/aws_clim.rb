@@ -327,11 +327,11 @@ class AwsClim
     workspaces-web
     xray
   ).each do |service_name|
-    define_method service_name do |*ps|
+    define_method "#{service_name.gsub('-', '_')}" do |*ps|
       execute(service_name, ps)
     end
 
-    define_method "#{service_name}_help" do
+    define_method "#{service_name.gsub('-', '_')}_help" do
       execute(service_name, 'help').data
     end
   end
