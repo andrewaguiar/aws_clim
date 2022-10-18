@@ -378,7 +378,9 @@ class AwsClim
 
   def format_option(option)
     if option.is_a?(Array)
-      "--#{option[0]}=\"#{option[1]}\""
+      name, value = option
+
+      "--#{name}=\"#{value.gsub('"', '\\"')}\""
     elsif option.is_a?(Hash)
       format_options(option.to_a)
     else
