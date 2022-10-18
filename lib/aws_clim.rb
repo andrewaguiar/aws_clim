@@ -338,6 +338,17 @@ class AwsClim
       execute(service_name, ps)
     end
 
+    define_method "#{service_name.gsub('-', '_')}!" do |*ps|
+      result = execute(service_name, ps)
+
+      if result.error?
+        puts result.data
+        exit 1
+      end
+
+      result
+    end
+
     define_method "#{service_name.gsub('-', '_')}_help" do
       execute(service_name, 'help').data
     end
