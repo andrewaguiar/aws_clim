@@ -10,6 +10,9 @@ dealing with the results.
   - Returns an `OpenStruct.new(error: true, success: false, data: err)` when error happens.
   - Returns an `OpenStruct.new(error: false, success: true, data: JSON.parse(out, object_class: OpenStruct))` when command returns successfuly.
 
+All results are converted to OpenStruct objects recursivelly, so no need to handle Hash objects like `result.data['AttributeA']['AttributeB']`,
+instead just call `resut.data.AttributeA.AttributeB`.
+
 ## Installation
 
 Add this line to your application's Gemfile:
@@ -62,7 +65,70 @@ result = aws.apigateway('put-method-response', {
 
 result.success?
 result.error?
-result.data
+result.data # data is a nested OpenStruct with all json returned from cli.
+```
+
+## Exit on fail option
+
+All services have a `!` option that simply exit(1) program when result is an error, so instead of doing:
+
+```
+result = aws.dynamodb('update-table', {
+  'table-name': table,
+  'attribute-definitions': attribute-definitions,
+  'global-secondary-index-updates': indexes
+})
+
+if result.error?
+  puts result.data
+  exit(1)
+end
+```
+
+You can simply call the `!` version:
+
+```
+result = aws.dynamodb!('update-table', {
+  'table-name': table,
+  'attribute-definitions': attribute-definitions,
+  'global-secondary-index-updates': indexes
+})
+```
+
+if `aws dynamodb update-table` command fails it will `exit(1)` from your program, so you don't need to
+check for `result.error?`.
+
+## Command + help
+
+All services have a `_help` option as well that simply executes a `command help` and returns the text.
+
+```
+puts a.ec2_help
+```
+
+result:
+
+```
+EC2()                                                                    EC2()
+
+
+
+NAME
+       ec2 -
+
+DESCRIPTION
+       Amazon Elastic Compute Cloud (Amazon EC2) provides secure and resizable
+       computing capacity in the AWS Cloud. Using Amazon  EC2  eliminates  the
+       need  to invest in hardware up front, so you can develop and deploy ap-
+       plications faster. Amazon Virtual Private Cloud  (Amazon  VPC)  enables
+       you  to  provision  a logically isolated section of the AWS Cloud where
+       you can launch AWS resources in a virtual network that you've  defined.
+       Amazon  Elastic  Block  Store (Amazon EBS) provides block level storage
+       volumes for use with EC2 instances. EBS volumes  are  highly  available
+       and  reliable  storage  volumes that can be attached to any running in-
+       stance and used like a hard drive.
+
+       ...
 ```
 
 ## Warning
